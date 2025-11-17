@@ -11,7 +11,6 @@ const useFetch = <T>(fetchFunction: () => Promise<T>, autoFetch = true) => {
             setError(null);
 
             const result = await fetchFunction();
-            console.log("Fetched data:", result);
             setData(result);
         } catch (err) {
             setError(
@@ -30,7 +29,6 @@ const useFetch = <T>(fetchFunction: () => Promise<T>, autoFetch = true) => {
 
     useEffect(() => {
         if (autoFetch) {
-            console.log("Auto-fetching data...");
             fetchData();
         }
     }, []);

@@ -1,44 +1,109 @@
-import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import MovieCard from '@/components/MovieCard';
+import SearchBar from '@/components/SearchBar';
+import { icons } from '@/constants/icons';
+import { images } from '@/constants/images';
+import { fetchMovies } from '@/services/api';
+import useFetch from '@/services/useFetch';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Text, View } from 'react-native';
 
 const Search = () => {
-  const originalUrl =
-    'https://api.themoviedb.org/3/trending/movie/day?language=en-US';
+  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    data: movies,
+    loading,
+    refetch: loadMovies,
+    reset,
+    error
+  } = useFetch(() => fetchMovies({ query: searchQuery }), false);
 
-  const proxyUrl =
-    "https://api.allorigins.win/raw?url=" + encodeURIComponent(originalUrl);
-
-  const fetchTestData = async () => {
-    const options = {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZTczODY3OTRkMDQ5MTZlY2Q4Mzk5MTk5OTNkMTFlOCIsIm5iZiI6MTc2MzE5Nzc5Ny4zOTEsInN1YiI6IjY5MTg0MzY1NjRhMzJiMjE2MjRjOWYxMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.-j-ZUW1lWfUrLSFpPQ0UueVy-enL3jclEM-3zqgiGRw'
-      }
-    };
-
-    try {
-      console.log("TEST DATA FETCHING......")
-      const response = await fetch(originalUrl, options)
-      console.log("TEST RESPONSE", response);
-
-      const json = await response.json();
-      console.log("TEST DATA", json);
-    } catch (error: any) {
-      console.log("Error-->", error?.message)
-    }
-  }
 
   useEffect(() => {
-    console.log("Test data fetching:");
+    const timeoutId = setTimeout(async () => {
+      if (searchQuery.trim()) {
+        await loadMovies()
+      } else {
+        reset()
+      }
+    }, 500)
 
-    fetchTestData()
+    // clear timeout 
+    return () => clearTimeout(timeoutId)
 
-  }, []);
+  }, [searchQuery])
 
   return (
-    <View>
-      <Text>Search</Text>
+    <View className='flex-1 bg-primary'>
+      <Image
+        source={images.bg}
+        className="absolute w-full z-0"
+        resizeMode="cover"
+      />
+
+      <FlatList
+        data={movies}
+        renderItem={({ item }) => <MovieCard {...item} />}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={3}
+        columnWrapperStyle={{
+          justifyContent: "flex-start",
+          gap: 16,
+          marginVertical: 16,
+        }}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        ListHeaderComponent={
+          <>
+            <View className="w-full flex-row justify-center mt-20 items-center">
+              <Image source={icons.logo} className="w-12 h-10" />
+            </View>
+
+            <View className="my-5">
+              <SearchBar
+                placeholder="Search for a movie."
+                value={searchQuery}
+                onChangeText={(text: string) => { setSearchQuery(text) }}
+              />
+            </View>
+
+            {loading && (
+              <ActivityIndicator
+                size="large"
+                color="#0000ff"
+                className="my-3"
+              />
+            )}
+
+            {error && (
+              <Text className="text-red-500 px-5 my-3">
+                Error: {error.message}
+              </Text>
+            )}
+
+            {!loading &&
+              !error &&
+              searchQuery.trim() &&
+              movies?.length! > 0 && (
+                <Text className="text-xl text-white font-bold">
+                  Search Results for{" "}
+                  <Text className="text-accent">{searchQuery}</Text>
+                </Text>
+              )}
+
+          </>
+        }
+        ListEmptyComponent={
+          !loading && !error ? (
+            <View className="mt-10 px-5">
+              <Text className="text-center text-gray-500">
+                {searchQuery.trim()
+                  ? "No movies found"
+                  : "Start typing to search for movies"}
+              </Text>
+            </View>
+          ) : null
+        }
+      />
+
     </View>
   )
 }

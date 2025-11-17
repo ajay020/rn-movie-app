@@ -7,24 +7,6 @@ export const TMDB_CONFIG = {
     },
 };
 
-export const fetchTestData = async () => {
-    const url = 'https://api.themoviedb.org/3/trending/movie/day?language=en-US';
-    const options = {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZTczODY3OTRkMDQ5MTZlY2Q4Mzk5MTk5OTNkMTFlOCIsIm5iZiI6MTc2MzE5Nzc5Ny4zOTEsInN1YiI6IjY5MTg0MzY1NjRhMzJiMjE2MjRjOWYxMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.-j-ZUW1lWfUrLSFpPQ0UueVy-enL3jclEM-3zqgiGRw'
-        }
-    };
-
-    console.log("TEST DATA FETCHING......")
-
-    fetch(url, options)
-        .then(res => res.json())
-        .then(json => console.log("TEST DATA", json))
-        .catch(err => console.error("TEST ERROR", err));
-}
-
 export const fetchMovies = async ({
     query,
 }: {
@@ -38,8 +20,6 @@ export const fetchMovies = async ({
         method: "GET",
         headers: TMDB_CONFIG.headers,
     });
-
-    console.log("Fetch movies response status:", response.status);
 
     if (!response.ok) {
         throw new Error(`Failed to fetch movies: ${response.statusText}`);
